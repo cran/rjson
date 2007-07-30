@@ -142,7 +142,8 @@ fromJSON <- function( json_str )
 
 .parseArray <- function( chars, i )
 {
-	arr <- c()
+	useVect <- TRUE
+    arr <- list()
 	if( chars[i] != "[" ) stop("error - no openning tag")
 	i = i + 1
 
@@ -155,7 +156,10 @@ fromJSON <- function( json_str )
 				
 		#get value
 		val = .parseValue( chars, i )
-		arr <- c( arr, val$val )
+        arr[[length(arr)+1]] <- val$val
+        if( is.list(val$val) || length(val$val) > 1)
+        	useVect <- FALSE
+        	
 		i = val$size
 		
 		#ignore whitespace
@@ -169,6 +173,8 @@ fromJSON <- function( json_str )
 		if( chars[i] != "," ) stop("error - no closing tag")
 		i = i + 1
 	}
+    if( useVect )
+    	arr <- unlist(arr)
 	return( list(val=arr, size=i) )
 }
 

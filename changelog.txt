@@ -1,0 +1,8 @@
+rjson change log
+
+version 0.1.1
+	changed behaviour of fromJSON to convert JSON arrays into lists
+	when arrays are multi-dimensional, and vectors for 1-dimensional arrays.
+
+version 0.1.0
+	released rjson
