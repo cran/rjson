@@ -254,7 +254,7 @@ fromJSON <- function( json_str )
 .parseNull <- function( chars, i )
 {
 	if( paste(chars[i:(i+3)], collapse="") == "null" )
-		return( list(val=FALSE,size=i+4) )
+		return( list(val=NA,size=i+4) )
 	stop("error parsing null value (maybe the word starts with n but isnt null)")
 }
 
