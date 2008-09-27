@@ -105,6 +105,12 @@ fromJSON <- function( json_str )
 		while( chars[i] == " " || chars[i] == "\t" || chars[i] == "\n" )
 			i = i + 1
 		
+		#look out for empty lists
+		if( chars[i] == "}" ) {
+			i = i + 1
+			break
+		}
+		
 		#get key
 		str = .parseString( chars, i )
 		key = str$val
@@ -148,11 +154,17 @@ fromJSON <- function( json_str )
 	i = i + 1
 
 	while( TRUE ) {
-	
+		
 		#ignore whitespace
 		while( chars[i] == " " || chars[i] == "\t" || chars[i] == "\n" )
 			i = i + 1
 	
+		#look out for empty arrays
+		if( chars[i] == "]" ) { 
+			i = i + 1
+			useVect <- FALSE #force an empty list instead of NULL (i.e. value = vector("list",0))
+			break
+		}
 				
 		#get value
 		val = .parseValue( chars, i )
