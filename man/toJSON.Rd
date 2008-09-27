@@ -2,7 +2,10 @@
 \alias{toJSON}
 \title{Convert R To JSON}
 
-\description{ Convert an R object into a corresponding JSON object. }
+\description{ Convert an R object into a corresponding JSON object.
+
+***Lists with unnamed components are not currently supported***
+ }
 
 \usage{toJSON( x )}
 
