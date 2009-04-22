@@ -15,10 +15,10 @@
 \examples{
 
 sample_json <- '
-{
-	"breakfast" : [ "milk", "fruit loops", "juice" ],
-	"lunch" : [ "left over sushi" ]
-}
+	{
+		"breakfast" : [ "milk", "fruit loops", "juice" ],
+		"lunch" : [ "left over sushi" ]
+	}
 '
 
 parser <- newJSONParser()

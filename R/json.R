@@ -8,9 +8,8 @@ toJSON <- function( x )
 	if( is.null(x) )
 		return( "null" )
 	
-	if( is.list(x) ) {
-		if( is.null(names(x)) )
-			stop("not yet handled")
+	#named lists only
+	if( is.list(x) && !is.null(names(x)) ) {
 		if( any(duplicated(names(x))) )
 			stop( "A JSON list must have unique names" );
 		str = "{"
@@ -26,9 +25,10 @@ toJSON <- function( x )
 		return( str )
 	}
 	
-	if( length(x) != 1 ) {
+	#treat lists without names as JSON array
+	if( length(x) != 1 || is.list(x) ) {
 		if( !is.null(names(x)) )
-			return( toJSON(as.list(x)) )
+			return( toJSON(as.list(x)) ) #vector with names - treat as JSON list
 		str = "["
 		first_elem = TRUE
 		for( val in x ) {
