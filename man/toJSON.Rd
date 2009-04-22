@@ -35,6 +35,11 @@ toJSON(islands[1:4])
 plot(cars, pch=2)
 json_cars <- toJSON(as.list(cars))
 points( data.frame( fromJSON( json_cars ) ), col="red", pch=3 )
+
+#special R types are encoded as strings
+testString <- c(1,2,3,4,NA,NaN,Inf,8,9);
+toJSON(testString);
+
 }
 
 %TODO find better keyword

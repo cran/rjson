@@ -1,6 +1,6 @@
 toJSON <- function( x )
 {
-	if( !is.vector(x) && !is.null(x) ) {
+	if( !is.vector(x) && !is.null(x) && !is.list(x) ) {
 		x <- as.list( x )
 		warning("JSON only supports vectors and lists - But I'll try anyways")
 	}
@@ -41,6 +41,15 @@ toJSON <- function( x )
 		str = paste( str, "]", sep="" )
 		return( str )
 	}
+
+	if( is.nan(x) )
+		return( "\"NaN\"" )
+
+	if( is.na(x) )
+		return( "\"NA\"" )
+
+	if( is.infinite(x) )
+		return( ifelse( x == Inf, "\"Inf\"", "\"-Inf\"" ) )
 	
 	if( is.logical(x) )
 		return( ifelse(x, "true", "false") )
@@ -189,7 +198,7 @@ fromJSON <- function( json_str )
 		#get value
 		val = .parseValue( chars, i )
 		if( is.null( val$incomplete ) == FALSE ) return( val )
-		obj[[key]] <- val$val
+		obj[key] <- list(val$val)
 		i = val$size
 		
 		if( i > length( chars ) ) return( list( "incomplete" = TRUE ) )
@@ -242,6 +251,7 @@ fromJSON <- function( json_str )
 		#get value
 		val = .parseValue( chars, i )
 		if( is.null( val$incomplete ) == FALSE ) return( val )
+		if( is.null( val$val ) ) val$val <- NA
         arr[[length(arr)+1]] <- val$val
         if( is.list(val$val) || length(val$val) > 1)
         	useVect <- FALSE
@@ -364,7 +374,7 @@ fromJSON <- function( json_str )
 .parseNull <- function( chars, i )
 {
 	if( paste(chars[i:(i+3)], collapse="") == "null" )
-		return( list(val=NA,size=i+4) )
+		return( list(val=NULL,size=i+4) )
 	stop("error parsing null value (maybe the word starts with n but isnt null)")
 }
 
