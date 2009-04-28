@@ -323,11 +323,11 @@ fromJSON <- function( json_str )
 	if( chars[i] == "0" ) {
 		i = i + 1
 		if( i > length( chars ) ) return( list( "incomplete" = TRUE ) )
-		if( any(grep("[1-9]", chars[i], extended = FALSE)) ) stop("JSON specs don't allow a number like \"012\"")
-	} else if( any(grep("[1-9]", chars[i], extended = FALSE)) ) {
+		if( any(grep("[1-9]", chars[i])) ) stop("JSON specs don't allow a number like \"012\"")
+	} else if( any(grep("[1-9]", chars[i])) ) {
 		i = i + 1
 		if( i > length( chars ) ) return( list( "incomplete" = TRUE ) )
-		while( any(grep("[0-9]", chars[i], extended = FALSE)) ) {
+		while( any(grep("[0-9]", chars[i])) ) {
 			i = i + 1
 			if( i > length( chars ) ) return( list( "incomplete" = TRUE ) )
 		}
@@ -338,7 +338,7 @@ fromJSON <- function( json_str )
 	if( chars[i] == "." ) {
 		i = i + 1
 		if( i > length( chars ) ) return( list( "incomplete" = TRUE ) )
-		while( any(grep("[0-9]", chars[i], extended = FALSE)) ) {
+		while( any(grep("[0-9]", chars[i])) ) {
 			i = i + 1
 			if( i > length( chars ) ) return( list( "incomplete" = TRUE ) )
 		}
