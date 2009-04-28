@@ -1,3 +1,6 @@
-0.5.6: August 23, 2009
+0.1.7: August 28, 2009
+	fixed toJSON bug: named vectors are now treated as json lists
+
+0.1.6: August 23, 2009
 	fixed toJSON bug: NA, NaN, Inf, -Inf are not converted to strings
 	fromJSON: null used to be returned as NA, but now is returned as NULL (but will still have the associated key displayed in the list)

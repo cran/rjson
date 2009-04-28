@@ -7,6 +7,11 @@ toJSON <- function( x )
 	
 	if( is.null(x) )
 		return( "null" )
+
+	#treat named vectors as lists
+	if( is.null( names( x ) ) == FALSE ) {
+		x <- as.list( x )
+	}
 	
 	#named lists only
 	if( is.list(x) && !is.null(names(x)) ) {
