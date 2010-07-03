@@ -1,5 +1,12 @@
 toJSON <- function( x )
 {
+	#convert factors to characters
+	if( is.factor( x ) == TRUE ) {
+		tmp_names <- names( x )
+		x = as.character( x )
+		names( x ) <- tmp_names
+	}
+
 	if( !is.vector(x) && !is.null(x) && !is.list(x) ) {
 		x <- as.list( x )
 		warning("JSON only supports vectors and lists - But I'll try anyways")
