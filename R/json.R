@@ -102,8 +102,20 @@ newJSONParser <- function()
 	) )
 }
 		
+fromJSON <- function( json_str, method = "C" )
+{
+	if( method == "R" )
+		return( .fromJSON_R( json_str ) )
+	if( method != "C" )
+		stop( "only R or C method allowed" )
 
-fromJSON <- function( json_str )
+	x <- .Call("fromJSON", json_str, PACKAGE="rjson")
+	if( class(x) == "try-error" )
+		stop( x )
+	return( x )
+}
+
+.fromJSON_R <- function( json_str )
 {
 	if( !is.character(json_str) )
 		stop( "JSON objects must be a character string" )
