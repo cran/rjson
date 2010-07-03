@@ -29,6 +29,7 @@ SEXP parseList( const char *s, const char **next_ch );
 SEXP mkError( const char* format, ...);
 
 
+#define TRYERROR_CLASS "try-error"
 SEXP mkError( const char* format, ...)
 {
 	SEXP p, classp;
@@ -39,54 +40,128 @@ SEXP mkError( const char* format, ...)
 	va_end( args );
 
 	PROTECT( p = allocVector(STRSXP, 1) );
-	SET_STRING_ELT( p, 0, mkChar( buf ) );
+	SET_STRING_ELT( p, 0, mkCharCE( buf, CE_UTF8 ) );
 	PROTECT( classp = allocVector(STRSXP, 1) );
-	SET_STRING_ELT( classp, 0, mkChar( "try-error" ) );
+	SET_STRING_ELT( classp, 0, mkChar( TRYERROR_CLASS ) );
 	SET_CLASS( p, classp );
 	UNPROTECT( 2 );
 	return p;
 }
 
+#define INCOMPLETE_CLASS "incomplete"
+SEXP addClass( SEXP p, const char * class )
+{
+	SEXP class_p;
+	PROTECT( class_p = GET_CLASS( p ) );
+	unsigned int size = GET_LENGTH( class_p );
+	SET_LENGTH( class_p, size + 1 );
+	SET_STRING_ELT( class_p, size, mkChar( class ) );
+	SET_CLASS( p, class_p );
+	UNPROTECT( 1 );
+	return p;
+}
 
+int hasClass( SEXP p, const char * class )
+{
+	int i;
+	SEXP class_p;
+	PROTECT( class_p = GET_CLASS( p ) );
+	unsigned int size = GET_LENGTH( class_p );
+	for( i = 0; i < size; i++ ) {
+		const char *s = CHAR(STRING_ELT(class_p, i));
+		if( strcmp( s, class ) == 0 ) {
+			UNPROTECT( 1 );
+			return TRUE;
+		}
+	}
+	UNPROTECT( 1 );
+	return FALSE;
+}
+
+#define         MASKBITS                0x3F
+#define         MASKBYTE                0x80
+#define         MASK2BYTES              0xC0
+#define         MASK3BYTES              0xE0
+
+int UTF8Encode2BytesUnicode( unsigned short input, char * s )
+{
+	// 0xxxxxxx
+	if( input < 0x80 )
+	{
+		s[ 0 ] = input;
+		return 1;
+	}
+	// 110xxxxx 10xxxxxx
+	else if( input < 0x800 )
+	{
+		s[ 0 ] = (MASK2BYTES | ( input >> 6 ) );
+		s[ 1 ] = (MASKBYTE | ( input & MASKBITS ) );
+		return 2;
+	}
+	// 1110xxxx 10xxxxxx 10xxxxxx
+	else if( input < 0x10000 )
+	{
+		s[ 0 ] = (MASK3BYTES | ( input >> 12 ) );
+		s[ 1 ] = (MASKBYTE | ( ( input >> 6 ) & MASKBITS ) );
+		s[ 2 ] = (MASKBYTE | ( input & MASKBITS ) );
+		return 3;
+	}
+}
 
 SEXP fromJSON( SEXP str_in )
 {
 	const char *s = CHAR(STRING_ELT(str_in,0));
 	const char *next_ch;
-	return parseValue( s, &next_ch );
+	SEXP p, next_i, list;
+	PROTECT( p = parseValue( s, &next_ch ) );
+
+	PROTECT( list = allocVector( VECSXP, 2 ) );
+	PROTECT( next_i = allocVector( INTSXP, 1 ) );
+	//PROTECT( list_names = allocVector( STRSXP, DEFAULT_VECTOR_START_SIZE ) );
+	
+	//SET_STRING_ELT( list_names, list_i, STRING_ELT(key, 0) );
+	SET_VECTOR_ELT( list, 0, p );
+
+	INTEGER( next_i )[ 0 ] = next_ch - s;
+	SET_VECTOR_ELT( list, 1, next_i );
+
+	UNPROTECT( 3 );
+	return list;
 }
 
 SEXP parseValue( const char *s, const char **next_ch )
 {
-	int i = 0;
-
 	/* ignore whitespace */
-	while( s[ i ] == ' ' || s[ i ] == '\t' || s[ i ] == '\n' )
-		i++;
+	while( *s == ' ' || *s == '\t' || *s == '\n' )
+		s++;
 
-	if( s[i] == '{' ) {
-		return parseList( s + i, next_ch );
+	if( *s == '{' ) {
+		return parseList( s, next_ch );
 	}
-	if( s[i] == '[' ) {
-		return parseArray( s + i, next_ch );
+	if( *s == '[' ) {
+		return parseArray( s, next_ch );
 	}
-	if( s[i] == '\"' ) {
-		return parseString( s + i, next_ch );
+	if( *s == '\"' ) {
+		return parseString( s, next_ch );
 	}
-	if( ( s[i] >= '0' && s[i] <= '9' ) || *s == '-' ) {
-		return parseNumber( s + i, next_ch );
+	if( ( *s >= '0' && *s <= '9' ) || *s == '-' ) {
+		return parseNumber( s, next_ch );
 	}
-	if( s[i] == 't' ) {
-		return parseTrue( s + i, next_ch );
+	if( *s == 't' ) {
+		return parseTrue( s, next_ch );
 	}
-	if( s[i] == 'f' ) {
-		return parseFalse( s + i, next_ch );
+	if( *s == 'f' ) {
+		return parseFalse( s, next_ch );
 	}
-	if( s[i] == 'n' ) {
-		return parseNull( s + i, next_ch );
+	if( *s == 'n' ) {
+		return parseNull( s, next_ch );
 	}
 
-	return mkError( "unexpected string (or empty string)'\n" );
+	if( *s == '\0' ) {
+		return addClass( mkError( "no data to parse\n" ), INCOMPLETE_CLASS );
+	}
+
+	return mkError( "unexpected character '%c'\n", *s );
 }
 
 SEXP parseNull( const char *s, const char **next_ch )
@@ -95,6 +170,10 @@ SEXP parseNull( const char *s, const char **next_ch )
 		*next_ch = s + 4;
 		return R_NilValue;
 	}
+
+	//TODO should really look at subset of "null" (e.g. "nul", "nu" ), so that "not" fails before reaching 4 digits
+	if( strlen( s ) < 4 )
+		return addClass( mkError( "parseNull: expected to see 'null' - likely an unquoted string starting with 'n', or truncated null.\n" ), INCOMPLETE_CLASS );
 	return mkError( "parseNull: expected to see 'null' - likely an unquoted string starting with 'n'.\n" );
 }
 
@@ -108,6 +187,8 @@ SEXP parseTrue( const char *s, const char **next_ch )
 		UNPROTECT( 1 );
 		return p;
 	}
+	if( strlen( s ) < 4 )
+		return addClass( mkError( "parseTrue: expected to see 'true' - likely an unquoted string starting with 't', or truncated true.\n" ), INCOMPLETE_CLASS );
 	return mkError( "parseTrue: expected to see 'true' - likely an unquoted string starting with 't'.\n" );
 }
 
@@ -121,6 +202,8 @@ SEXP parseFalse( const char *s, const char **next_ch )
 		UNPROTECT( 1 );
 		return p;
 	}
+	if( strlen( s ) < 5 )
+		return addClass( mkError( "parseFalse: expected to see 'false' - likely an unquoted string starting with 'f', or truncated false.\n" ), INCOMPLETE_CLASS );
 	return mkError( "parseFalse: expected to see 'false' - likely an unquoted string starting with 'f'.\n" );
 }
 
@@ -145,15 +228,16 @@ SEXP parseString( const char *s, const char **next_ch )
 		while( s[ i ] != '\\' && s[ i ] != '"' && s[ i ] != '\0' )
 			i++;
 		if( s[ i ] == '\0' ) {
-			return mkError( "unclosed string\n" );
+			return addClass( mkError( "unclosed string\n" ), INCOMPLETE_CLASS );
 		}
 
 		if( s[ i ] == '\\' ) {
 			if( s[ i + 1 ] == '\0' ) {
-				return mkError( "unclosed string\n" );
+				return addClass( mkError( "unclosed string\n" ), INCOMPLETE_CLASS );
 			}
+			//TODO couldn't this be caught above (where s[ i ] == '\0')
 			if( s[ i + 2 ] == '\0' ) {
-				return mkError( "unclosed string\n" );
+				return addClass( mkError( "unclosed string\n" ), INCOMPLETE_CLASS );
 			}
 
 			/* save string chunk from copy_start to i-1 */
@@ -193,7 +277,22 @@ SEXP parseString( const char *s, const char **next_ch )
 					buf[ buf_i ] = '\t';
 					break;
 				case 'u':
-					return mkError( "unicode is not (yet) supported by rjson - sorry" );
+					for( int j = 1; j <= 4; j++ )
+						if( ( ( s[ i + j ] >= 'a' && s[ i + j ] <= 'f' ) || 
+						    ( s[ i + j ] >= 'A' && s[ i + j ] <= 'F' ) ||
+						    ( s[ i + j ] >= '0' && s[ i + j ] <= '9' ) ) == FALSE ) {
+							return mkError( "unexpected unicode escaped char '%c'; 4 hex digits should follow the \\u (found %i valid digits)", s[ i + j ], j - 1 );
+						}
+
+					unsigned short unicode;
+					char unicode_buf[ 5 ]; /* to hold 4 digit hex (to prevent scanning a 5th digit accidentally */
+					strncpy( unicode_buf, s + i + 1, 5 );
+					unicode_buf[ 4 ] = '\0';
+					sscanf( unicode_buf, "%hx", &unicode);
+					buf_i += UTF8Encode2BytesUnicode( unicode, buf + buf_i ) - 1; /* -1 due to buf_i++ out of loop */
+
+					i += 4; /* skip the four digits - actually point to last digit, which is then incremented outside of switch */
+
 					break;
 				default:
 					return mkError( "unexpected escaped character '\\%c'", s[ i ] );
@@ -223,7 +322,7 @@ SEXP parseString( const char *s, const char **next_ch )
 
 	*next_ch = s + i + 1;
 	PROTECT(p=allocVector(STRSXP, 1));
-	SET_STRING_ELT(p, 0, mkChar( buf ));
+	SET_STRING_ELT(p, 0, mkCharCE( buf, CE_UTF8 ));
 	free( buf );
 	UNPROTECT( 1 );
 	return p;
@@ -261,16 +360,23 @@ SEXP parseArray( const char *s, const char **next_ch )
 			s++;
 		if( *s == '\0' ) {
 			UNPROTECT( objs );
-			return mkError( "incomplete array\n" );
+			return addClass( mkError( "incomplete array\n" ), INCOMPLETE_CLASS );
 		}
 
 		if( *s == ']' ) {
+			*next_ch = s + 1;
 			return allocVector(VECSXP, 0);
 		}
 
 		PROTECT( p = parseValue( s, next_ch ) );
 		objs++;
 		s = *next_ch;
+
+		/* check p for errors */
+		if( hasClass( p, TRYERROR_CLASS ) == TRUE ) {
+			UNPROTECT( objs );
+			return p;
+		}
 
 		if( array == NULL ) {
 			/*create a vector of type that matches p*/
@@ -285,7 +391,6 @@ SEXP parseArray( const char *s, const char **next_ch )
 
 		/*check array type matches*/
 		if( is_list == FALSE && TYPEOF( p ) != TYPEOF( array ) ) {
-			Rprintf( "changing to list\n" );
 			PROTECT( array = coerceVector( array, VECSXP ) );
 			objs++;
 			is_list = TRUE;
@@ -309,7 +414,7 @@ SEXP parseArray( const char *s, const char **next_ch )
 			s++;
 		if( *s == '\0' ) {
 			UNPROTECT( objs );
-			return mkError( "incomplete array\n" );
+			return addClass( mkError( "incomplete array\n" ), INCOMPLETE_CLASS );
 		}
 
 		/*end of array*/
@@ -322,7 +427,7 @@ SEXP parseArray( const char *s, const char **next_ch )
 			s++;
 		} else if( *s == '\0' ) {
 			UNPROTECT( objs );
-			return mkError( "incomplete array\n" );
+			return addClass( mkError( "incomplete array\n" ), INCOMPLETE_CLASS );
 		} else {
 			UNPROTECT( objs );
 			return mkError( "unexpected character: %c\n", *s );
@@ -356,10 +461,12 @@ SEXP parseList( const char *s, const char **next_ch )
 			s++;
 		if( *s == '\0' ) {
 			UNPROTECT( objs );
-			return mkError( "incomplete list\n" );
+			return addClass( mkError( "incomplete list\n" ), INCOMPLETE_CLASS );
 		}
 
 		if( *s == '}' ) {
+			UNPROTECT( objs );
+			*next_ch = s + 1;
 			return allocVector(VECSXP, 0);
 		}
 
@@ -367,6 +474,12 @@ SEXP parseList( const char *s, const char **next_ch )
 		PROTECT( key = parseValue( s, next_ch ) );
 		objs++;
 		s = *next_ch;
+
+		/* check key for errors */
+		if( hasClass( key, TRYERROR_CLASS ) == TRUE ) {
+			UNPROTECT( objs );
+			return key;
+		}
 
 		if( IS_CHARACTER( key ) == FALSE ) {
 			UNPROTECT( objs );
@@ -378,7 +491,9 @@ SEXP parseList( const char *s, const char **next_ch )
 			s++;
 		if( *s != ':' ) {
 			UNPROTECT( objs );
-			return mkError( "incomplete list\n" );
+			if( *s == '\0' )
+				return addClass( mkError( "incomplete list - missing :\n" ), INCOMPLETE_CLASS );
+			return mkError( "incomplete list - missing :\n" );
 		}
 		s++; /*move past ':'*/
 
@@ -387,13 +502,19 @@ SEXP parseList( const char *s, const char **next_ch )
 			s++;
 		if( *s == '\0' ) {
 			UNPROTECT( objs );
-			return mkError( "incomplete list\n" );
+			return addClass( mkError( "incomplete list\n" ), INCOMPLETE_CLASS );
 		}
 
 		/*get value*/
 		PROTECT( val = parseValue( s, next_ch ) );
 		objs++;
 		s = *next_ch;
+
+		/* check val for errors */
+		if( hasClass( val, TRYERROR_CLASS ) == TRUE ) {
+			UNPROTECT( objs );
+			return val;
+		}
 
 		/*checksize*/
 		unsigned int list_size = GET_LENGTH( list );
@@ -412,7 +533,7 @@ SEXP parseList( const char *s, const char **next_ch )
 			s++;
 		if( *s == '\0' ) {
 			UNPROTECT( objs );
-			return mkError( "incomplete list\n" );
+			return addClass( mkError( "incomplete list\n" ), INCOMPLETE_CLASS );
 		}
 
 		/*end of list*/
@@ -423,9 +544,6 @@ SEXP parseList( const char *s, const char **next_ch )
 		/*more elements to come*/
 		if( *s == ',' ) {
 			s++;
-		} else if( *s == '\0' ) {
-			UNPROTECT( objs );
-			return mkError( "incomplete list\n" );
 		} else {
 			UNPROTECT( objs );
 			return mkError( "unexpected character: %c\n", *s );
@@ -456,7 +574,7 @@ SEXP parseNumber( const char *s, const char **next_ch )
 		s++;
 
 	if( *s == '\0' ) {
-		return mkError( "unexpected character: %c\n", *s );
+		return addClass( mkError( "parseNumer error\n", *s ), INCOMPLETE_CLASS );
 	}
 
 	if( *s == '0' ) {

@@ -4,7 +4,11 @@
 
 \description{ Convert a collection of JSON objects into R objects. }
 
-\usage{newJSONParser()}
+\usage{newJSONParser(method = "R")}
+
+\arguments{
+\item{method}{use the \code{C} implementation, or the slower original \code{R} implementation}
+}
 
 \value{A list of functions used for parsing objects}
 

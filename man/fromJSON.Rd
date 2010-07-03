@@ -4,10 +4,11 @@
 
 \description{ Convert a JSON object into an R object. }
 
-\usage{fromJSON( json_str, method = "C" )}
+\usage{fromJSON( json_str, file, method = "C" )}
 
 \arguments{
 \item{json_str}{a JSON object to convert}
+\item{file}{the name of a file to read the json_str from; this can also be a URL. Only one of json_str or file must be supplied.}
 \item{method}{use the \code{C} implementation, or the older slower (and one day to be depricated) \code{R} implementation}
 }
 
