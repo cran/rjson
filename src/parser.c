@@ -132,7 +132,7 @@ SEXP fromJSON( SEXP str_in )
 SEXP parseValue( const char *s, const char **next_ch )
 {
 	/* ignore whitespace */
-	while( *s == ' ' || *s == '\t' || *s == '\n' )
+	while( *s == ' ' || *s == '\t' || *s == '\n' || *s == '\r' )
 		s++;
 
 	if( *s == '{' ) {
@@ -373,7 +373,7 @@ SEXP parseArray( const char *s, const char **next_ch )
 
 	while( 1 ) {
 		/*ignore whitespace*/
-		while( *s == ' ' || *s == '\t' || *s == '\n' )
+		while( *s == ' ' || *s == '\t' || *s == '\n' || *s == '\r' )
 			s++;
 		if( *s == '\0' ) {
 			UNPROTECT( objs );
@@ -431,7 +431,7 @@ SEXP parseArray( const char *s, const char **next_ch )
 		array_i++;
 
 		/*ignore whitespace*/
-		while( *s == ' ' || *s == '\t' || *s == '\n' )
+		while( *s == ' ' || *s == '\t' || *s == '\n' || *s == '\r' )
 			s++;
 		if( *s == '\0' ) {
 			UNPROTECT( objs );
@@ -479,7 +479,7 @@ SEXP parseList( const char *s, const char **next_ch )
 
 	while( 1 ) {
 		/*ignore whitespace*/
-		while( *s == ' ' || *s == '\t' || *s == '\n' )
+		while( *s == ' ' || *s == '\t' || *s == '\n' || *s == '\r' )
 			s++;
 		if( *s == '\0' ) {
 			UNPROTECT( objs );
@@ -513,7 +513,7 @@ SEXP parseList( const char *s, const char **next_ch )
 		}
 
 		/*ignore whitespace*/
-		while( *s == ' ' || *s == '\t' || *s == '\n' )
+		while( *s == ' ' || *s == '\t' || *s == '\n' || *s == '\r' )
 			s++;
 		if( *s != ':' ) {
 			UNPROTECT( objs );
@@ -524,7 +524,7 @@ SEXP parseList( const char *s, const char **next_ch )
 		s++; /*move past ':'*/
 
 		/*ignore whitespace*/
-		while( *s == ' ' || *s == '\t' || *s == '\n' )
+		while( *s == ' ' || *s == '\t' || *s == '\n' || *s == '\r' )
 			s++;
 		if( *s == '\0' ) {
 			UNPROTECT( objs );
@@ -559,7 +559,7 @@ SEXP parseList( const char *s, const char **next_ch )
 		list_i++;
 
 		/*ignore whitespace*/
-		while( *s == ' ' || *s == '\t' || *s == '\n' )
+		while( *s == ' ' || *s == '\t' || *s == '\n' || *s == '\r' )
 			s++;
 		if( *s == '\0' ) {
 			UNPROTECT( objs );

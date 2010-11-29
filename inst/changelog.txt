@@ -1,3 +1,5 @@
+0.2.3: Dec 12, 2010
+	bugfix: allow '\r' to b whitespace rather than just use '\n'
 0.2.2: Nov 29, 2010
 	bugfix: protection stack overflow - now uses PROTECT_WITH_INDEX() rather pushing far too many protects on to the stack
 	bugfix: added missing protects to SET_LENGTH calls
