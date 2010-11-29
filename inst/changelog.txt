@@ -1,3 +1,12 @@
+0.2.2: Nov 29, 2010
+	bugfix: protection stack overflow - now uses PROTECT_WITH_INDEX() rather pushing far too many protects on to the stack
+	bugfix: added missing protects to SET_LENGTH calls
+
+0.2.1: unknown (missing entry)
+
+0.2.0: unknown (missing entry)
+	introduced a C based parser for reading JSON
+
 0.1.7: August 28, 2009
 	fixed toJSON bug: named vectors are now treated as json lists
 

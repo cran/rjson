@@ -54,10 +54,10 @@ SEXP addClass( SEXP p, const char * class )
 	SEXP class_p;
 	PROTECT( class_p = GET_CLASS( p ) );
 	unsigned int size = GET_LENGTH( class_p );
-	SET_LENGTH( class_p, size + 1 );
+	PROTECT( SET_LENGTH( class_p, size + 1 ) );
 	SET_STRING_ELT( class_p, size, mkChar( class ) );
 	SET_CLASS( p, class_p );
-	UNPROTECT( 1 );
+	UNPROTECT( 2 );
 	return p;
 }
 
@@ -344,8 +344,24 @@ void setArrayElement( SEXP array, int unsigned i, SEXP val )
 		Rprintf( "unsupported SEXPTYPE: %i\n", TYPEOF( array ) );
 }
 
+SEXP test( void )
+{
+
+	int i;
+	SEXP p, array;
+	PROTECT( array = allocVector( REALSXP, DEFAULT_VECTOR_START_SIZE ) );
+	PROTECT( p = allocVector( REALSXP, 1 ) );
+	REAL( p )[ 0 ] = 4;
+	for( i = 0; i < 1000000; i++ ) {
+		setArrayElement( array, i, p );
+	}
+	UNPROTECT( 2 );
+	return array;
+}
+
 SEXP parseArray( const char *s, const char **next_ch )
 {
+	PROTECT_INDEX p_index = -1, array_index = -1;
 	SEXP p = NULL, array = NULL;
 	/*assert( *s == '[' )*/
 	s++; /*move past '['*/
@@ -353,6 +369,7 @@ SEXP parseArray( const char *s, const char **next_ch )
 	int is_list = FALSE;
 	SEXPTYPE  p_type = -1;
 	unsigned int array_i = 0;
+
 
 	while( 1 ) {
 		/*ignore whitespace*/
@@ -368,8 +385,13 @@ SEXP parseArray( const char *s, const char **next_ch )
 			return allocVector(VECSXP, 0);
 		}
 
-		PROTECT( p = parseValue( s, next_ch ) );
-		objs++;
+		/* parse element (and protect pointer - ugly) */
+		if( p == NULL ) {
+			PROTECT_WITH_INDEX( p = parseValue( s, next_ch ), &p_index );
+			objs++;
+		} else {
+			REPROTECT( p = parseValue( s, next_ch ), p_index );
+		}
 		s = *next_ch;
 
 		/* check p for errors */
@@ -384,22 +406,21 @@ SEXP parseArray( const char *s, const char **next_ch )
 				p_type = VECSXP;
 			else
 				p_type = TYPEOF( p );
-			PROTECT( array = allocVector( p_type, DEFAULT_VECTOR_START_SIZE ) );
+			PROTECT_WITH_INDEX( array = allocVector( p_type, DEFAULT_VECTOR_START_SIZE ), &array_index );
 			objs++;
 			is_list = ( p_type == VECSXP );
 		}
 
 		/*check array type matches*/
 		if( is_list == FALSE && TYPEOF( p ) != TYPEOF( array ) ) {
-			PROTECT( array = coerceVector( array, VECSXP ) );
-			objs++;
+			REPROTECT( array = coerceVector( array, VECSXP ), array_index );
 			is_list = TRUE;
 		}
 
 		/*checksize*/
 		unsigned int array_size = GET_LENGTH( array );
 		if( array_i >= array_size ) {
-			SET_LENGTH( array, array_size * 2 );
+			REPROTECT( SET_LENGTH( array, array_size * 2 ), array_index );
 		}
 
 		/*save element*/
@@ -434,7 +455,7 @@ SEXP parseArray( const char *s, const char **next_ch )
 		}
 	}
 
-	/*trim to the correct size*/
+	/*trim to the correct size - no need to protect here*/
 	SET_LENGTH( array, array_i );
 
 	*next_ch = s + 1;
@@ -445,14 +466,15 @@ SEXP parseArray( const char *s, const char **next_ch )
 
 SEXP parseList( const char *s, const char **next_ch )
 {
-	SEXP key, val, list, list_names;
+	PROTECT_INDEX key_index, val_index, list_index, list_names_index;
+	SEXP key = NULL, val = NULL, list, list_names;
 	/*assert( *s == '{' )*/
 	s++; /*move past '{'*/
 	int objs = 0;
 	unsigned int list_i = 0;
 
-	PROTECT( list = allocVector( VECSXP, DEFAULT_VECTOR_START_SIZE ) );
-	PROTECT( list_names = allocVector( STRSXP, DEFAULT_VECTOR_START_SIZE ) );
+	PROTECT_WITH_INDEX( list = allocVector( VECSXP, DEFAULT_VECTOR_START_SIZE ), &list_index );
+	PROTECT_WITH_INDEX( list_names = allocVector( STRSXP, DEFAULT_VECTOR_START_SIZE ), &list_names_index );
 	objs += 2;
 
 	while( 1 ) {
@@ -471,8 +493,12 @@ SEXP parseList( const char *s, const char **next_ch )
 		}
 
 		/*get key*/
-		PROTECT( key = parseValue( s, next_ch ) );
-		objs++;
+		if( key == NULL ) {
+			PROTECT_WITH_INDEX( key = parseValue( s, next_ch ), &key_index );
+			objs++;
+		} else {
+			REPROTECT( key = parseValue( s, next_ch ), key_index );
+		}
 		s = *next_ch;
 
 		/* check key for errors */
@@ -506,8 +532,12 @@ SEXP parseList( const char *s, const char **next_ch )
 		}
 
 		/*get value*/
-		PROTECT( val = parseValue( s, next_ch ) );
-		objs++;
+		if( val == NULL ) {
+			PROTECT_WITH_INDEX( val = parseValue( s, next_ch ), &val_index );
+			objs++;
+		} else {
+			REPROTECT( val = parseValue( s, next_ch ), val_index );
+		}
 		s = *next_ch;
 
 		/* check val for errors */
@@ -519,8 +549,8 @@ SEXP parseList( const char *s, const char **next_ch )
 		/*checksize*/
 		unsigned int list_size = GET_LENGTH( list );
 		if( list_i >= list_size ) {
-			SET_LENGTH( list, list_size * 2 );
-			SET_LENGTH( list_names, list_size * 2 );
+			REPROTECT( SET_LENGTH( list, list_size * 2 ), list_index );
+			REPROTECT( SET_LENGTH( list_names, list_size * 2 ), list_names_index );
 		}
 
 		/*save key and value*/
@@ -551,8 +581,8 @@ SEXP parseList( const char *s, const char **next_ch )
 	}
 
 	/*trim to the correct size*/
-	SET_LENGTH( list, list_i );
-	SET_LENGTH( list_names, list_i );
+	REPROTECT( SET_LENGTH( list, list_i ), list_index );
+	REPROTECT( SET_LENGTH( list_names, list_i ), list_names_index );
 
 	/*set names*/
 	setAttrib( list, R_NamesSymbol, list_names );
