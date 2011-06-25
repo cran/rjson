@@ -1,3 +1,5 @@
+0.2.4: June 25, 2011
+	bugfix: memory issue when parsing strings with mostly (or only) escaped characters greater than 256bytes
 0.2.3: Dec 12, 2010
 	bugfix: allow '\r' to b whitespace rather than just use '\n'
 0.2.2: Nov 29, 2010

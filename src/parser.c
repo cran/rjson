@@ -215,6 +215,7 @@ SEXP parseString( const char *s, const char **next_ch )
 
 	int buf_size = 256;
 	char *buf = (char*) malloc( buf_size );
+	buf[0] = '\0';
 	int buf_i = 0;
 	if( buf == NULL )
 		return mkError( "error allocating memory in parseString" );
@@ -240,15 +241,17 @@ SEXP parseString( const char *s, const char **next_ch )
 				return addClass( mkError( "unclosed string\n" ), INCOMPLETE_CLASS );
 			}
 
+			/* grow memory */
+			if( buf_size - 1 <= i ) {
+				buf_size *= 2;
+				buf = realloc( buf, buf_size );
+				if( buf == NULL )
+					return mkError( "error allocating memory in parseString" );
+			}
+			
 			/* save string chunk from copy_start to i-1 */
 			bytes_to_copy = i - copy_start;
 			if( bytes_to_copy > 0 ) {
-				if( buf_size - 1 <= i ) {
-					/* grow memory */
-					buf = realloc( buf, i * 2 );
-					if( buf == NULL )
-						return mkError( "error allocating memory in parseString" );
-				}
 				memcpy( buf + buf_i, s + copy_start, bytes_to_copy );
 				buf_i += bytes_to_copy;
 			}
@@ -304,14 +307,15 @@ SEXP parseString( const char *s, const char **next_ch )
 			buf_i++;
 		} else {
 			/*must be a quote that caused us the exit the loop, first, save remaining string data*/
+			if( buf_size - 1 <= i ) {
+				/* grow memory */
+				buf_size *= 2;
+				buf = realloc( buf, buf_size );
+				if( buf == NULL )
+					return mkError( "error allocating memory in parseString" );
+			}
 			bytes_to_copy = i - copy_start;
 			if( bytes_to_copy > 0 ) {
-				if( buf_size - 1 <= i ) {
-					/* grow memory */
-					buf = realloc( buf, i * 2 );
-					if( buf == NULL )
-						return mkError( "error allocating memory in parseString" );
-				}
 				memcpy( buf + buf_i, s + copy_start, bytes_to_copy );
 				buf_i += bytes_to_copy;
 			}
@@ -319,7 +323,7 @@ SEXP parseString( const char *s, const char **next_ch )
 			break; /*exit the loop*/
 		}
 	}
-
+	
 	*next_ch = s + i + 1;
 	PROTECT(p=allocVector(STRSXP, 1));
 	SET_STRING_ELT(p, 0, mkCharCE( buf, CE_UTF8 ));
@@ -422,27 +426,29 @@ SEXP parseArray( const char *s, const char **next_ch )
 		if( array_i >= array_size ) {
 			REPROTECT( SET_LENGTH( array, array_size * 2 ), array_index );
 		}
-
+		
 		/*save element*/
 		if( is_list == TRUE )
 			SET_VECTOR_ELT( array, array_i, p);
 		else
 			setArrayElement( array, array_i, p );
 		array_i++;
-
+		
 		/*ignore whitespace*/
 		while( *s == ' ' || *s == '\t' || *s == '\n' || *s == '\r' )
 			s++;
+		
 		if( *s == '\0' ) {
 			UNPROTECT( objs );
 			return addClass( mkError( "incomplete array\n" ), INCOMPLETE_CLASS );
 		}
 
+		
 		/*end of array*/
 		if( *s == ']' ) {
 			break;
 		}
-
+		
 		/*more elements to come*/
 		if( *s == ',' ) {
 			s++;
@@ -454,12 +460,12 @@ SEXP parseArray( const char *s, const char **next_ch )
 			return mkError( "unexpected character: %c\n", *s );
 		}
 	}
-
+	
 	/*trim to the correct size - no need to protect here*/
 	SET_LENGTH( array, array_i );
-
+	
 	*next_ch = s + 1;
-
+	
 	UNPROTECT( objs );
 	return array;
 }
