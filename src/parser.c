@@ -243,7 +243,7 @@ SEXP parseString( const char *s, const char **next_ch )
 
 			/* grow memory */
 			if( buf_size - 1 <= i ) {
-				buf_size *= 2;
+				buf_size = 2 * ( buf_size + i );
 				buf = realloc( buf, buf_size );
 				if( buf == NULL )
 					return mkError( "error allocating memory in parseString" );
@@ -252,6 +252,7 @@ SEXP parseString( const char *s, const char **next_ch )
 			/* save string chunk from copy_start to i-1 */
 			bytes_to_copy = i - copy_start;
 			if( bytes_to_copy > 0 ) {
+
 				memcpy( buf + buf_i, s + copy_start, bytes_to_copy );
 				buf_i += bytes_to_copy;
 			}
@@ -309,7 +310,7 @@ SEXP parseString( const char *s, const char **next_ch )
 			/*must be a quote that caused us the exit the loop, first, save remaining string data*/
 			if( buf_size - 1 <= i ) {
 				/* grow memory */
-				buf_size *= 2;
+				buf_size = 2 * ( buf_size + i );
 				buf = realloc( buf, buf_size );
 				if( buf == NULL )
 					return mkError( "error allocating memory in parseString" );
@@ -323,6 +324,7 @@ SEXP parseString( const char *s, const char **next_ch )
 			break; /*exit the loop*/
 		}
 	}
+	
 	
 	*next_ch = s + i + 1;
 	PROTECT(p=allocVector(STRSXP, 1));

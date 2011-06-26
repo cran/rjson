@@ -1,3 +1,5 @@
+0.2.4: June 26, 2011
+	bugfix: too hasty with the previous release, and introduced a bug for characters greater than 512 bytes (was blindly doubling the buffer size when sometimes it needed more)
 0.2.4: June 25, 2011
 	bugfix: memory issue when parsing strings with mostly (or only) escaped characters greater than 256bytes
 0.2.3: Dec 12, 2010
