@@ -376,7 +376,6 @@ SEXP parseArray( const char *s, const char **next_ch )
 	SEXPTYPE  p_type = -1;
 	unsigned int array_i = 0;
 
-
 	while( 1 ) {
 		/*ignore whitespace*/
 		while( *s == ' ' || *s == '\t' || *s == '\n' || *s == '\r' )
@@ -418,7 +417,7 @@ SEXP parseArray( const char *s, const char **next_ch )
 		}
 
 		/*check array type matches*/
-		if( is_list == FALSE && TYPEOF( p ) != TYPEOF( array ) ) {
+		if( is_list == FALSE && ( TYPEOF( p ) != TYPEOF( array ) || GET_LENGTH( p ) != 1 ) ) {
 			REPROTECT( array = coerceVector( array, VECSXP ), array_index );
 			is_list = TRUE;
 		}

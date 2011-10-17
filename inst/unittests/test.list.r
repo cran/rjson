@@ -27,5 +27,14 @@ test.list <- function()
 	checkIdentical( x, correct )
 	checkIdentical( x[["clap"]], correct[["clap"]] )
 
+
 }
 
+test.nestedlist <- function()
+{
+	json <- "[\"a\", [\"b\", \"c\"] ]"
+	x <- fromJSON( json )
+	correct <- list( "a", c( "b", "c" ) )
+	checkIdentical( x, correct )
+	checkIdentical( x[[2]], correct[[2]] )
+}

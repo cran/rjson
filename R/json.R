@@ -307,9 +307,8 @@ fromJSON <- function( json_str, file, method = "C" )
 		#get value
 		val = .parseValue( chars, i )
 		if( is.null( val$incomplete ) == FALSE ) return( val )
-		if( is.null( val$val ) ) val$val <- NA
-        arr[[length(arr)+1]] <- val$val
-        if( is.list(val$val) || length(val$val) > 1)
+		arr[length(arr)+1] <- list(val$val)
+        if( is.list(val$val) || length(val$val) > 1 || is.null(val$val) )
         	useVect <- FALSE
         	
 		i = val$size
