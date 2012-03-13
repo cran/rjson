@@ -1,3 +1,5 @@
+0.2.7: Mar 12, 2012
+	rewrote toJSON to use a C implementation which is much faster. Thanks to Simon for the reminder.
 0.2.6: Oct 17, 2011
 	bufix: fromJSON('["A",["B","C"]]') incorrectly returned "A" "B" (thanks Brad Friedman for reporting it)
 	bufix: fromJSON('["A", null]', method="R") was using NA rather than NULL (missed case from version 0.1.6)

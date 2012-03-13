@@ -7,10 +7,11 @@
 ***Lists with unnamed components are not currently supported***
  }
 
-\usage{toJSON( x )}
+\usage{toJSON( x, method="C" )}
 
 \arguments{
 \item{x}{a vector or list to convert into a JSON object}
+\item{method}{use the \code{C} implementation, or the older slower (and one day to be depricated) \code{R} implementation}
 }
 
 \value{a string containing the JSON object}
