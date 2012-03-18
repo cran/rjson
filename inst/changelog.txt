@@ -1,3 +1,5 @@
+0.2.8: Mar 18, 2012
+	Changed ordering of includes in dump.cpp to fix compilation issue on OSX (thanks Rob)
 0.2.7: Mar 12, 2012
 	rewrote toJSON to use a C implementation which is much faster. Thanks to Simon for the reminder.
 0.2.6: Oct 17, 2011

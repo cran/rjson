@@ -1,9 +1,10 @@
-#include <R.h>
-#include <Rdefines.h>
-
 #include <string>
 #include <sstream>
 #include <iomanip>
+
+//must include these after STL files due to length macro in Rinternals being seen by a STL on OSX.
+#include <R.h>
+#include <Rdefines.h>
 
 std::string escapeString( const char *s )
 {
