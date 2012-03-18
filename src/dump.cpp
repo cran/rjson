@@ -115,7 +115,7 @@ std::string toJSON2( SEXP x )
 		container_closer = "}";
 		if( length(names) != n )
 			error("number of names does not match number of elements\n");
-	} else if( n > 1 || TYPEOF(x) == VECSXP ) {
+	} else if( n != 1 || TYPEOF(x) == VECSXP ) {
 		oss << "[";
 		container_closer = "]";
 	}
