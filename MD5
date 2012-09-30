@@ -1,10 +1,10 @@
-6327f3e566e0b3d679e916e122f6a82b *DESCRIPTION
+8ba84ff67aaee78d52bdd1b672a53acb *DESCRIPTION
 34551522533d48d0a968454bea1b4d30 *NAMESPACE
-706d19b912b78c948c3402084ea48af9 *R/json.R
+4640f0c282bd3c140386e2a935ae6385 *R/json.R
 fe0816aba49fd43d5839ec47f7424a4e *R/zzz.R
-fa2f24c310fcb10717c317c8fc9006cd *inst/changelog.txt
+9046d86d74ac81b62c6aa19407907383 *inst/changelog.txt
 d5ee201778e62a76798467a2b5e05939 *inst/doc/json_rpc_server.Rnw
-3c39aaf2aa84c7cdc06450b41ae9aeb9 *inst/doc/json_rpc_server.pdf
+7ff18b220eb15163deec852bcae107bf *inst/doc/json_rpc_server.pdf
 cee224c8dc417dece605178406f9b2d5 *inst/rpc_server/server.r
 ce0131b40a9fe6dbd17ac5e623c438e9 *inst/rpc_server/some_script.r
 e29f8f1f26f017f214682f36e42db7e6 *inst/rpc_server/start_server
@@ -22,5 +22,5 @@ f199072cb2d721fa87e732296d86757e *inst/unittests/test.unicode.r
 73ac4e80373c696d07214d36ac7f0622 *man/newJSONParser.Rd
 0d41a3e0097885679eb96d80b17aa766 *man/rjson.Rd
 8c44b9023e78c35cf4b62af840975262 *man/toJSON.Rd
-6988e9d9f6e9c604e1ebfc56160059bf *src/dump.cpp
+63a6b3cd9a16e4b07f5e1b4a223bed58 *src/dump.cpp
 c3f9befaf381a6fa011e27cca6eb75a3 *src/parser.c

@@ -36,7 +36,7 @@ toJSON <- function( x, method = "C" )
 				first_elem = FALSE
 			else
 				str = paste(str, ',', sep="")
-			str = paste(str, deparse(n), ":", toJSON(x[[n]]), sep="")
+			str = paste(str, deparse(n), ":", toJSON(x[[n]], "R"), sep="")
 		}
 		str = paste( str, "}", sep="" )
 		return( str )
@@ -45,7 +45,7 @@ toJSON <- function( x, method = "C" )
 	#treat lists without names as JSON array
 	if( length(x) != 1 || is.list(x) ) {
 		if( !is.null(names(x)) )
-			return( toJSON(as.list(x)) ) #vector with names - treat as JSON list
+			return( toJSON(as.list(x), "R") ) #vector with names - treat as JSON list
 		str = "["
 		first_elem = TRUE
 		for( val in x ) {
@@ -53,7 +53,7 @@ toJSON <- function( x, method = "C" )
 				first_elem = FALSE
 			else
 				str = paste(str, ',', sep="")
-			str = paste(str, toJSON(val), sep="")
+			str = paste(str, toJSON(val, "R"), sep="")
 		}
 		str = paste( str, "]", sep="" )
 		return( str )

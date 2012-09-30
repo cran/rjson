@@ -1,6 +1,7 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
+#include <limits>
 
 //must include these after STL files due to length macro in Rinternals being seen by a STL on OSX.
 #include <R.h>
@@ -109,7 +110,7 @@ std::string toJSON2( SEXP x )
 	//int container = NO_CONTAINER;
 	std::string container_closer;
 	std::ostringstream oss;
-
+	
 	if( names != NULL_USER_OBJECT ) {
 		oss << "{";
 		container_closer = "}";
@@ -153,18 +154,21 @@ std::string toJSON2( SEXP x )
 			break;
 		case REALSXP:
 			for( i = 0; i < n; i++ ) {
-				if( i > 0 )
+				if( i > 0 ) {
 					oss << ",";
-				if( names != NULL_USER_OBJECT )
+				}
+				if( names != NULL_USER_OBJECT ) {
 					oss << escapeString(CHAR(STRING_ELT(names, i))) << ":";
-				if( ISNA(REAL(x)[i]) )
+				}
+				if( ISNA(REAL(x)[i]) ) {
 					oss << "\"NA\"";
-				else if( ISNAN(REAL(x)[i]) )
+				} else if( ISNAN(REAL(x)[i]) ) {
 					oss << "\"NaN\"";
-				else if( R_FINITE(REAL(x)[i]) )
-					oss << REAL(x)[i];
-				else
+				} else if( R_FINITE(REAL(x)[i]) ) {
+					oss << std::setprecision( std::numeric_limits<double>::digits10 ) << REAL(x)[i];
+				} else {
 					oss << (REAL(x)[i] > 0 ? "\"Inf\"" : "\"-Inf\"");
+				}
 			}
 			break;
 		case CPLXSXP:
