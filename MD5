@@ -1,10 +1,10 @@
-cda8f2f7bbf4d49020695f769d861952 *DESCRIPTION
+4b3a715345e182d018776fdb68416a46 *DESCRIPTION
 34551522533d48d0a968454bea1b4d30 *NAMESPACE
-9b723349ff24e700b129db07d8f808b0 *R/json.R
+e55356bebdb32a78f25913061ad61cb9 *R/json.R
 fe0816aba49fd43d5839ec47f7424a4e *R/zzz.R
 3eadbc78b5bb07643db14d365416f7c4 *inst/changelog.txt
 d5ee201778e62a76798467a2b5e05939 *inst/doc/json_rpc_server.Rnw
-48056192b7ad385802289127677e4b3a *inst/doc/json_rpc_server.pdf
+37bebbc789033a63b0cd8a23c250542a *inst/doc/json_rpc_server.pdf
 cee224c8dc417dece605178406f9b2d5 *inst/rpc_server/server.r
 ce0131b40a9fe6dbd17ac5e623c438e9 *inst/rpc_server/some_script.r
 e29f8f1f26f017f214682f36e42db7e6 *inst/rpc_server/start_server
@@ -20,8 +20,9 @@ f1a69faf07ff11ae05dbfa6506006400 *inst/unittests/test.strings.r
 c092ae9e4fa9e9a38dada80e022578e6 *inst/unittests/test.twitter.r
 f199072cb2d721fa87e732296d86757e *inst/unittests/test.unicode.r
 e8ad3a9acb7040339ae9f0f00b258a9e *man/fromJSON.Rd
-73ac4e80373c696d07214d36ac7f0622 *man/newJSONParser.Rd
+bd9f6db6dd53775f9f0e32f769aa0791 *man/newJSONParser.Rd
 0d41a3e0097885679eb96d80b17aa766 *man/rjson.Rd
 8c44b9023e78c35cf4b62af840975262 *man/toJSON.Rd
 93d51de794d9775178e9879d13f747bc *src/dump.cpp
 c994ae4749f00961f0cea0398464e22a *src/parser.c
+d5ee201778e62a76798467a2b5e05939 *vignettes/json_rpc_server.Rnw
