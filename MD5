@@ -1,11 +1,11 @@
-d7c274de02a6f806441ffd604e558fd0 *DESCRIPTION
+3f00bc501bfc9a9f8bec8ea5deed9064 *DESCRIPTION
 34551522533d48d0a968454bea1b4d30 *NAMESPACE
 ab5fbf4c2318554c20587e1a65c40d3e *R/json.R
 0489b313250de174ca1d68cbf67f9000 *R/zzz.R
 ddee8e54f131ce90f35676b8f24300ae *build/vignette.rds
 3d5b4e4226d0991bf95efa1bce1f1ab1 *inst/changelog.txt
 475d7413bdebc23bc88ca5e2176721d5 *inst/doc/json_rpc_server.Rnw
-ae3404d5d3543970464e260dd36e1900 *inst/doc/json_rpc_server.pdf
+840d022de21cf18e9e7aef7b15fa045d *inst/doc/json_rpc_server.pdf
 cee224c8dc417dece605178406f9b2d5 *inst/rpc_server/server.r
 ce0131b40a9fe6dbd17ac5e623c438e9 *inst/rpc_server/some_script.r
 e29f8f1f26f017f214682f36e42db7e6 *inst/rpc_server/start_server
@@ -14,7 +14,7 @@ d6a2d5044743f5f4235bdd72e4d87cd7 *inst/unittests/runtests.r
 53d51f59838c16022f293e07e700d08b *inst/unittests/test.array.r
 c1a9ccb854491a312e8afde84e3e8cf4 *inst/unittests/test.big.r
 d9da76109062c8e9b65807c53053e784 *inst/unittests/test.factors.r
-c362ee302209d046cba6935a81ab2b00 *inst/unittests/test.list.r
+32416767cfe1768135f47529976f691d *inst/unittests/test.list.r
 9bbd49e1b8d8d9a446a7b5caaae8e751 *inst/unittests/test.number.r
 3ba186f308594cf58f9257b54d0d36d8 *inst/unittests/test.strings.r
 f5bc8385d4462948bd04504b5be58ac1 *inst/unittests/test.tojson.r
@@ -26,6 +26,6 @@ b84795a61a8fa36f040a15e5e164e64c *man/newJSONParser.Rd
 5cf2de957205ec8e3e112260c09394c8 *man/toJSON.Rd
 7d7f75bfeb67a6619fea7e4317269c04 *src/dump.cpp
 e6ecf688be5e6cfdc1eeea9cdb4d2025 *src/funcs.h
-11791ee1eebd32a4f1540747d3889f81 *src/parser.c
+f81bfd4c645d6f520c8535813fdab806 *src/parser.c
 a7be366e1ce0ef75d876f96e955024c2 *src/register.c
 475d7413bdebc23bc88ca5e2176721d5 *vignettes/json_rpc_server.Rnw
