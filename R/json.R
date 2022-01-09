@@ -16,7 +16,7 @@ toJSON <- function( x, indent = 0, method = "C" )
 		x <- as.list( x )
 		warning("JSON only supports vectors and lists - But I'll try anyways")
 	}
-	
+
 	if( is.null(x) )
 		return( "null" )
 
@@ -24,7 +24,7 @@ toJSON <- function( x, indent = 0, method = "C" )
 	if( is.null( names( x ) ) == FALSE ) {
 		x <- as.list( x )
 	}
-	
+
 	#named lists only
 	if( is.list(x) && !is.null(names(x)) ) {
 		if( any(duplicated(names(x))) )
@@ -41,7 +41,7 @@ toJSON <- function( x, indent = 0, method = "C" )
 		str = paste( str, "}", sep="" )
 		return( str )
 	}
-	
+
 	#treat lists without names as JSON array
 	if( length(x) != 1 || is.list(x) ) {
 		if( !is.null(names(x)) )
@@ -67,16 +67,16 @@ toJSON <- function( x, indent = 0, method = "C" )
 
 	if( is.infinite(x) )
 		return( ifelse( x == Inf, "\"Inf\"", "\"-Inf\"" ) )
-	
+
 	if( is.logical(x) )
 		return( ifelse(x, "true", "false") )
-	
+
 	if( is.character(x) )
 		return( gsub("\\/", "\\\\/", deparse(x)) )
-	
+
 	if( is.numeric(x) )
 		return( as.character(x) )
-	
+
 	stop( "shouldnt make it here - unhandled type not caught" )
 }
 
@@ -87,7 +87,7 @@ newJSONParser <- function( method = "R" )
 	if( method == "R" ) {
 		buffer <- c()
 		return(	list(
-			"addData" = function( buf ) { 
+			"addData" = function( buf ) {
 				chars = strsplit(buf, "")[[1]]
 				for( ch in chars )
 					buffer[ length(buffer) + 1 ]  <<- ch
@@ -109,7 +109,7 @@ newJSONParser <- function( method = "R" )
 	} else if( method == "C" ) {
 		buffer <- ""
 		return(	list(
-			"addData" = function( buf ) { 
+			"addData" = function( buf ) {
 				buffer <<- paste( buffer, buf, sep="" )
 			},
 			"getObject" = function()
@@ -128,7 +128,7 @@ newJSONParser <- function( method = "R" )
 	stop("bad method - only R or C" )
 }
 
-		
+
 fromJSON <- function( json_str, file, method = "C", unexpected.escape = "error", simplify = TRUE )
 {
 	if( missing( json_str ) ) {
@@ -140,13 +140,26 @@ fromJSON <- function( json_str, file, method = "C", unexpected.escape = "error",
 			stop( "only one of json_str or file must be supplied to fromJSON")
 		}
 	}
-	
+
+	if( !is.character(json_str) )
+		stop( "json_str must be a character string" )
+
+	if( length(json_str) != 1 )
+		stop( "json_str can only contain a single element" )
+
+	json_str <- trimws( json_str )
+
 	if( method == "R" )
 		return( .fromJSON_R( json_str ) )
 	if( method != "C" )
 		stop( "only R or C method allowed" )
 
-	x <- .Call("fromJSON", json_str, unexpected.escape, simplify, PACKAGE="rjson")[[ 1 ]]
+	tmp <- .Call("fromJSON", json_str, unexpected.escape, simplify, PACKAGE="rjson")
+	size <- tmp[[ 2 ]]
+	if( size != nchar( json_str, type = "bytes" ) ) {
+		stop( sprintf("not all data was parsed (%d chars were parsed out of a total of %d chars)", size, nchar( json_str, type = "bytes" ) ) )
+	}
+	x <- tmp[[ 1 ]]
 	if( any( class(x) == "try-error" ) )
 		stop( x )
 	return( x )
@@ -168,7 +181,7 @@ fromJSON <- function( json_str, file, method = "C", unexpected.escape = "error",
 {
 	if( i > length( chars ) )
 		return( list( "incomplete" = TRUE ) )
-	
+
 	#ignore whitespace
 	while( chars[i] == " " || chars[i] == "\t" || chars[i] == "\n" ) {
 		i = i + 1
@@ -199,7 +212,7 @@ fromJSON <- function( json_str, file, method = "C", unexpected.escape = "error",
 		return( .parseNull( chars, i ) )
 	}
 	#stop("shouldnt reach end of parseValue")
-	
+
 	err <- paste( "unexpected data:", paste( chars[ i:length(chars)], collapse = "" ) )
 	stop( err )
 }
@@ -210,44 +223,41 @@ fromJSON <- function( json_str, file, method = "C", unexpected.escape = "error",
 	if( chars[i] != "{" ) stop("error - no openning tag")
 	i = i + 1
 	if( i > length( chars ) ) return( list( "incomplete" = TRUE ) )
-	
+
 	first_pass <- TRUE
 	while( TRUE ) {
-	
+
 		#ignore whitespace
 		while( chars[i] == " " || chars[i] == "\t" || chars[i] == "\n" ) {
 			i = i + 1
 			if( i > length( chars ) ) return( list( "incomplete" = TRUE ) )
 		}
 
-		
 		#look out for empty lists
 		if( chars[i] == "}" && first_pass == TRUE ) {
 			i = i + 1
 			break
 		}
 		first_pass <- FALSE
-		
+
 		#get key
 		str = .parseString( chars, i )
 		if( is.null( str$incomplete ) == FALSE ) return( str )
 		key = str$val
 		i = str$size
 		if( i > length( chars ) ) return( list( "incomplete" = TRUE ) )
-		
+
 		#ignore whitespace
 		while( chars[i] == " " || chars[i] == "\t" || chars[i] == "\n" ) {
 			i = i + 1
 			if( i > length( chars ) ) return( list( "incomplete" = TRUE ) )
 		}
 
-		
 		#verify seperater
 		if( chars[i] != ":" ) stop("error - no seperator")
 		i = i + 1
 		if( i > length( chars ) ) return( list( "incomplete" = TRUE ) )
 
-		
 		#ignore whitespace
 		while( chars[i] == " " || chars[i] == "\t" || chars[i] == "\n" ) {
 			i = i + 1
@@ -255,22 +265,21 @@ fromJSON <- function( json_str, file, method = "C", unexpected.escape = "error",
 				return( list( "incomplete" = TRUE ) )
 		}
 
-		
 		#get value
 		val = .parseValue( chars, i )
 		if( is.null( val$incomplete ) == FALSE ) return( val )
 		obj[key] <- list(val$val)
 		i = val$size
-		
+
 		if( i > length( chars ) ) return( list( "incomplete" = TRUE ) )
-	
+
 		#ignore whitespace
 		while( chars[i] == " " || chars[i] == "\t" || chars[i] == "\n" ) {
 			i = i + 1
 			if( i > length( chars ) )
 				return( list( "incomplete" = TRUE ) )
 		}
-		
+
 		if( chars[i] == "}" ) {
 			i = i + 1
 			break
@@ -294,39 +303,36 @@ fromJSON <- function( json_str, file, method = "C", unexpected.escape = "error",
 		return( list( "incomplete" = TRUE ) )
 
 	while( TRUE ) {
-		
 		#ignore whitespace
 		while( chars[i] == " " || chars[i] == "\t" || chars[i] == "\n" ) {
 			i = i + 1
 			if( i > length( chars ) )
 				return( list( "incomplete" = TRUE ) )
 		}
-	
 		#look out for empty arrays
-		if( chars[i] == "]" ) { 
+		if( chars[i] == "]" ) {
 			i = i + 1
 			useVect <- FALSE #force an empty list instead of NULL (i.e. value = vector("list",0))
 			break
 		}
-				
 		#get value
 		val = .parseValue( chars, i )
 		if( is.null( val$incomplete ) == FALSE ) return( val )
 		arr[length(arr)+1] <- list(val$val)
-        if( is.list(val$val) || length(val$val) > 1 || is.null(val$val) )
-        	useVect <- FALSE
-        	
+		if( is.list(val$val) || length(val$val) > 1 || is.null(val$val) )
+			useVect <- FALSE
+
 		i = val$size
 		if( i > length( chars ) ) return( list( "incomplete" = TRUE ) )
-		
+
 		#ignore whitespace
 		while( chars[i] == " " || chars[i] == "\t" || chars[i] == "\n" ) {
 			i = i + 1
 			if( i > length( chars ) )
 				return( list( "incomplete" = TRUE ) )
 		}
-		
-		if( chars[i] == "]" ) { 
+
+		if( chars[i] == "]" ) {
 			i = i + 1
 			break
 		}
@@ -346,7 +352,7 @@ fromJSON <- function( json_str, file, method = "C", unexpected.escape = "error",
 	if( chars[i] != "\"") stop("error")
 	i = i + 1
 	if( i > length( chars ) ) return( list( "incomplete" = TRUE ) )
-	
+
 	while( TRUE ) {
 		while( chars[i] != "\\" && chars[i] != "\"" ) {
 			i = i + 1
@@ -362,7 +368,7 @@ fromJSON <- function( json_str, file, method = "C", unexpected.escape = "error",
 	str_end = i
 	i = i + 1
 	return(list(
-		val=eval(parse( text=paste(chars[str_start:str_end], collapse="") )), 
+		val=eval(parse( text=paste(chars[str_start:str_end], collapse="") )),
 		size=i ))
 }
 
@@ -372,9 +378,9 @@ fromJSON <- function( json_str, file, method = "C", unexpected.escape = "error",
 
 	if( chars[i] == "-" )
 		i = i + 1
-	
+
 	if( i > length( chars ) ) return( list( "incomplete" = TRUE ) )
-	
+
 	if( chars[i] == "0" ) {
 		i = i + 1
 		if( i > length( chars ) ) return( list( "incomplete" = TRUE ) )
@@ -389,7 +395,7 @@ fromJSON <- function( json_str, file, method = "C", unexpected.escape = "error",
 	} else {
 		stop( "doesn't look like a valid JSON number" )
 	}
-	
+
 	if( chars[i] == "." ) {
 		i = i + 1
 		if( i > length( chars ) ) return( list( "incomplete" = TRUE ) )
@@ -398,7 +404,7 @@ fromJSON <- function( json_str, file, method = "C", unexpected.escape = "error",
 			if( i > length( chars ) ) return( list( "incomplete" = TRUE ) )
 		}
 	}
-	
+
 	if( chars[i] == "e" || chars[i] == "E" ) {
 		i = i + 1
 		if( i > length( chars ) ) return( list( "incomplete" = TRUE ) )
@@ -411,9 +417,9 @@ fromJSON <- function( json_str, file, method = "C", unexpected.escape = "error",
 		}
 	}
 	str_end = i-1
-	
+
 	return(list(
-		val=eval(parse( text=paste(chars[str_start:str_end], collapse="") )), 
+		val=eval(parse( text=paste(chars[str_start:str_end], collapse="") )),
 		size=i ))
 }
 
@@ -437,8 +443,3 @@ fromJSON <- function( json_str, file, method = "C", unexpected.escape = "error",
 		return( list(val=NULL,size=i+4) )
 	stop("error parsing null value (maybe the word starts with n but isnt null)")
 }
-
-
-
-
-
