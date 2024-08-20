@@ -1,11 +1,11 @@
-f64c32b281a27a55e24b2b76e47778ba *DESCRIPTION
+1a2274f978f4f4f76b277efae3b3058c *DESCRIPTION
 34551522533d48d0a968454bea1b4d30 *NAMESPACE
 920bfe228e7e39254acf58be1769b632 *R/json.R
 0489b313250de174ca1d68cbf67f9000 *R/zzz.R
-d3a7b09a750075fbdeb90929c22d9793 *build/vignette.rds
+c9d46cb3257c9cab0e1936b1823bc0bf *build/vignette.rds
 4ed09b8481d72e96ce34417910575cba *inst/changelog.txt
 475d7413bdebc23bc88ca5e2176721d5 *inst/doc/json_rpc_server.Rnw
-292b48130f928c6c014902fa97de62c6 *inst/doc/json_rpc_server.pdf
+296fdf42a9f0c0978a7a5cbaec544e73 *inst/doc/json_rpc_server.pdf
 cee224c8dc417dece605178406f9b2d5 *inst/rpc_server/server.r
 ce0131b40a9fe6dbd17ac5e623c438e9 *inst/rpc_server/some_script.r
 e29f8f1f26f017f214682f36e42db7e6 *inst/rpc_server/start_server
@@ -26,7 +26,7 @@ e33c13542af5bfcee0bc29bf206a8b1b *inst/unittests/test.unicode.r
 b84795a61a8fa36f040a15e5e164e64c *man/newJSONParser.Rd
 3125920a7f681fd8670e16a21ccead94 *man/rjson.Rd
 ff2f8e8ab06f34554d18135ce45d172b *man/toJSON.Rd
-f8a8dfb8874b94a79716172ce5563a7a *src/dump.cpp
+576a2c8ed6901398273fdfeb16c6dcd3 *src/dump.cpp
 153eaf540a186337afb167fae3aab570 *src/funcs.h
 6b58a6ea3f99c06da6f2432f722a827b *src/parser.c
 a2b3707ed77dc4020a3518df3c23c1ca *src/register.c
