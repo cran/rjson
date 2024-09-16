@@ -1,11 +1,11 @@
-1a2274f978f4f4f76b277efae3b3058c *DESCRIPTION
+eddd667b747bec3c0c5900cca9e16d77 *DESCRIPTION
 34551522533d48d0a968454bea1b4d30 *NAMESPACE
 920bfe228e7e39254acf58be1769b632 *R/json.R
 0489b313250de174ca1d68cbf67f9000 *R/zzz.R
 c9d46cb3257c9cab0e1936b1823bc0bf *build/vignette.rds
 4ed09b8481d72e96ce34417910575cba *inst/changelog.txt
 475d7413bdebc23bc88ca5e2176721d5 *inst/doc/json_rpc_server.Rnw
-296fdf42a9f0c0978a7a5cbaec544e73 *inst/doc/json_rpc_server.pdf
+6b00f146f5265fac1c832216140d3250 *inst/doc/json_rpc_server.pdf
 cee224c8dc417dece605178406f9b2d5 *inst/rpc_server/server.r
 ce0131b40a9fe6dbd17ac5e623c438e9 *inst/rpc_server/some_script.r
 e29f8f1f26f017f214682f36e42db7e6 *inst/rpc_server/start_server
